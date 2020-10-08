@@ -20,40 +20,44 @@
 
 # Usage:
 #   python  bin_parse.py bin_to_split.bin
-# 	split bin components are saved into the current working directory
+#   split bin components are saved into the current working directory
+
 
 import sys
 import os
-from array import *
+import array
+
 
 def writechunk(filename, bindata):
-	with open(filename, "wb") as thisfile:
-	  thisfile.write(bindata)
-	  thisfile.close()
+    with open(filename, "wb") as thisfile:
+        thisfile.write(bindata)
+        thisfile.close()
+
 
 def bcdascii(bcd_array):
-	result = array('B')
-	for x in bcd_array:
-		result.append((x >> 4) + 48)
-		result.append((x & 15) + 48)
-	return result.tostring()	
+    result = array.array("B")
+    for x in bcd_array:
+        result.append((x >> 4) + 48)
+        result.append((x & 15) + 48)
+    return result.tobytes().decode()
+
 
 path = sys.argv[1]
 
-with open( path, 'rb') as file:
+with open(path, "rb") as file:
 
-	fdata = bytearray(file.read())
-	
-	# Byte swap to little endian byte ordering, if necessary
-	if fdata[0] == 48:
-		fdata[0::2], fdata[1::2] = fdata[1::2], fdata[0::2]
-	
-	bo = fdata[0:65536]  # 64Kb
-	va = fdata[65536:196608]  # 128Kb
-	vi = fdata[237568:245760] # 8Kb
-	fm = fdata[245760: 262144] # 16Kb
+    fdata = bytearray(file.read())
 
-	file.close()
+    # Byte swap to little endian byte ordering, if necessary
+    if fdata[0] == 48:
+        fdata[0::2], fdata[1::2] = fdata[1::2], fdata[0::2]
+
+    bo = fdata[0:65536]  # 64Kb
+    va = fdata[65536:196608]  # 128Kb
+    vi = fdata[237568:245760]  # 8Kb
+    fm = fdata[245760:262144]  # 16Kb
+
+    file.close()
 
 
 writechunk(bo[1024:1040:2].decode() + ".bin", bo)
